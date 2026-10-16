@@ -10,7 +10,7 @@ type Template = BasePart | Model
 type Bounds = { Center: Vector3, Size: Vector3 }
 
 -- Constants
-
+local NOT_TEMPLATE_TAG = "NOT_SOURCE"
 -- Private Functions
 local function getTemplates(source: Instance, parameters: Parameters): { Template }
 	if source:IsA("BasePart") or source:IsA("Model") then
@@ -18,20 +18,30 @@ local function getTemplates(source: Instance, parameters: Parameters): { Templat
 	end
 	assert(source:IsA("Folder"), `unsupported source type: "{source.ClassName}"`)
 	local templates: { Template } = {}
-	for index, descendant in source:GetDescendants() do
-		if descendant:IsA("BasePart") or descendant:IsA("Model") then
-			table.insert(templates, descendant)
-		end
-		if index % parameters.Attributes.PauseInterval == 0 then
-			parameters:Pause()
+	local function gatherTemplates(root: Instance)
+		for i, v in root:GetChildren() do
+			if v:HasTag(NOT_TEMPLATE_TAG) then
+				continue
+			end
+			if v:IsA("Model") then
+				table.insert(templates, v)
+			elseif v:IsA("BasePart") then
+				table.insert(templates, v)
+			else
+				gatherTemplates(v)
+			end
 		end
 	end
+	gatherTemplates(source)
+
 	-- Uniquely named templates retain their selection order when insertion order changes.
 	table.sort(templates, function(a, b)
 		local aPath, bPath = a:GetFullName(), b:GetFullName()
 		return if aPath == bPath then a.ClassName < b.ClassName else aPath < bPath
 	end)
+
 	assert(#templates > 0, `source folder "{source:GetFullName()}" contains no BaseParts or Models`)
+
 	return templates
 end
 
@@ -137,7 +147,10 @@ local function checkPadding(center: Vector3, size: Vector3, placed: { Bounds }, 
 			math.max(0, math.abs(delta.Y) - halfSize.Y),
 			math.max(0, math.abs(delta.Z) - halfSize.Z)
 		)
-		assert(gap.Magnitude + 0.0001 >= padding, "RandomPadding cannot be satisfied; reduce rotation/count or use Fit")
+		assert(
+			gap.Magnitude + ENV.SMALL >= padding,
+			"RandomPadding cannot be satisfied; reduce rotation/count or use Fit"
+		)
 		if index % parameters.Attributes.PauseInterval == 0 then
 			parameters:Pause()
 		end

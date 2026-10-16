@@ -20,6 +20,7 @@ type Env = {
 	RANDOM_PAN: NumberRange,
 	RANDOM_TILT: NumberRange,
 	RANDOM_PLACEMENT: Types.PlacementType,
+	SMALL: number,
 	[any]: never,
 }
 -- Constants
@@ -44,6 +45,7 @@ local DEFAULT_ENV: Env = {
 	RANDOM_PAN = NumberRange.new(0),
 	RANDOM_TILT = NumberRange.new(0),
 	RANDOM_PLACEMENT = "Grid",
+	SMALL = 0.0001,
 }
 local out: Env = setmetatable({}, {
 	__index = function(_, readableKey: string): any?
