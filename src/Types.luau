@@ -11,16 +11,16 @@ export type PackageAttributes = {
 	SourcePath: string, -- where the original template is found, if a folder it will randomly select one of the basePart / model descendants using the seed
 	SourcePathDelimiter: string, -- in case you want to use "/" instead of "." for the path
 	SourceMaxYield: number, -- how long to wait for the template to appear (if streaming enabled keep high, if not, do whatever)
-	GeneratedAlignment: AlignType, -- where it will place the instance within the box
-	GeneratedScale: ScaleType, -- how it will try to size the instance within the box
+	GeneratedAlignment: AlignType, -- Center aligns within a cell; Floor rests on the bottom of the generation box
+	GeneratedScale: ScaleType, -- Default sizes BaseParts to the cell and fits Models; Fit is uniform; Height matches cell height
 	GeneratedTags: string, -- tags it will add to the copies of the template in comma delimited format (aka "tag1,tag2,tag3"), spaces immediately after commas are ignored
-	GeneratedCount: NumberRange, -- how many copies of the source will be created
+	GeneratedCount: NumberRange, -- inclusive range of non-negative integer copy counts
 	RandomSeed: number, -- used to keep regeneration deterministic
-	RandomPadding: NumberRange, -- minimum separation between instances
-	RandomRoll: NumberRange, -- X axis random rotation
-	RandomPan: NumberRange, -- Y axis random rotation
-	RandomTilt: NumberRange, -- Z axis random rotation
-	RandomPlacement: PlacementType, -- how multiple
+	RandomPadding: NumberRange, -- minimum separation between instances; a single seeded gap is sampled per generation
+	RandomRoll: NumberRange, -- X axis random rotation in degrees
+	RandomPan: NumberRange, -- Y axis random rotation in degrees
+	RandomTilt: NumberRange, -- Z axis random rotation in degrees
+	RandomPlacement: PlacementType, -- Grid is X/Z on Floor or X/Y/Z in Center; Line follows X; Random shuffles and jitters cells
 }
 
 export type GenerationFunctionParams<Attributes> = {

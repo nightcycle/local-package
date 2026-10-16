@@ -1,12 +1,9 @@
 --!strict
 -- Services
 -- Packages
-local IndexUtil = require(script.Parent.IndexUtil)
-local TypeUnionLib = require(script.Parent.TypeUnionLib)
-local Future = TypeUnionLib.Future
-local Result = TypeUnionLib.Result
 -- Modules
 local Generator = require(script.Generator)
+local ENV = require(script.ENV)
 -- Types
 -- Constants
 -- Variables
@@ -14,5 +11,6 @@ local Generator = require(script.Generator)
 -- Private Functions
 -- CLass
 return {
+	ENV = ENV,
 	Generator = Generator,
 }
