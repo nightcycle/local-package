@@ -11,6 +11,7 @@ export type PackageAttributes = {
 	SourcePath: string, -- where the original template is found, if a folder it will randomly select one of the basePart / model descendants using the seed
 	SourcePathDelimiter: string, -- in case you want to use "/" instead of "." for the path
 	SourceMaxYield: number, -- how long to wait for the template to appear (if streaming enabled keep high, if not, do whatever)
+	PauseInterval: number, -- positive integer loop iterations between cooperative pauses
 	GeneratedAlignment: AlignType, -- Center aligns within a cell; Floor rests on the bottom of the generation box
 	GeneratedScale: ScaleType, -- Default sizes BaseParts to the cell and fits Models; Fit is uniform; Height matches cell height
 	GeneratedTags: string, -- tags it will add to the copies of the template in comma delimited format (aka "tag1,tag2,tag3"), spaces immediately after commas are ignored

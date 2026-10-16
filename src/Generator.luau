@@ -22,7 +22,7 @@ local function getTemplates(source: Instance, parameters: Parameters): { Templat
 		if descendant:IsA("BasePart") or descendant:IsA("Model") then
 			table.insert(templates, descendant)
 		end
-		if index % ENV.PAUSE_INTERVAL == 0 then
+		if index % parameters.Attributes.PauseInterval == 0 then
 			parameters:Pause()
 		end
 	end
@@ -53,7 +53,7 @@ local function getGrid(size: Vector3, count: number, parameters: Parameters): Ve
 			z += 1
 		end
 		iterations += 1
-		if iterations % ENV.PAUSE_INTERVAL == 0 then
+		if iterations % parameters.Attributes.PauseInterval == 0 then
 			parameters:Pause()
 		end
 	end
@@ -138,7 +138,7 @@ local function checkPadding(center: Vector3, size: Vector3, placed: { Bounds }, 
 			math.max(0, math.abs(delta.Z) - halfSize.Z)
 		)
 		assert(gap.Magnitude + 0.0001 >= padding, "RandomPadding cannot be satisfied; reduce rotation/count or use Fit")
-		if index % ENV.PAUSE_INTERVAL == 0 then
+		if index % parameters.Attributes.PauseInterval == 0 then
 			parameters:Pause()
 		end
 	end
@@ -150,19 +150,20 @@ local Module = {}
 function Module.new(): Types.GeneratorModuleDefinition<Types.PackageAttributes>
 	return {
 		Attributes = {
-			SourcePath = "",
-			SourcePathDelimiter = ".",
-			SourceMaxYield = 15,
-			GeneratedAlignment = "Floor",
-			GeneratedScale = "Default",
-			GeneratedTags = "",
-			GeneratedCount = NumberRange.new(1),
-			RandomSeed = 0,
-			RandomPadding = NumberRange.new(0),
-			RandomRoll = NumberRange.new(0),
-			RandomPan = NumberRange.new(0),
-			RandomTilt = NumberRange.new(0),
-			RandomPlacement = "Grid",
+			SourcePath = ENV.SOURCE_PATH,
+			SourcePathDelimiter = ENV.SOURCE_PATH_DELIMITER,
+			SourceMaxYield = ENV.SOURCE_MAX_YIELD,
+			PauseInterval = ENV.PAUSE_INTERVAL,
+			GeneratedAlignment = ENV.GENERATED_ALIGNMENT,
+			GeneratedScale = ENV.GENERATED_SCALE,
+			GeneratedTags = ENV.GENERATED_TAGS,
+			GeneratedCount = ENV.GENERATED_COUNT,
+			RandomSeed = ENV.RANDOM_SEED,
+			RandomPadding = ENV.RANDOM_PADDING,
+			RandomRoll = ENV.RANDOM_ROLL,
+			RandomPan = ENV.RANDOM_PAN,
+			RandomTilt = ENV.RANDOM_TILT,
+			RandomPlacement = ENV.RANDOM_PLACEMENT,
 		},
 		OnGenerate = function(parameters: Parameters, targetContainer: GeneratedFolder): ()
 			targetContainer.Archivable = false
@@ -174,6 +175,11 @@ function Module.new(): Types.GeneratorModuleDefinition<Types.PackageAttributes>
 			assert(size.X > 0 and size.Y > 0 and size.Z > 0, "generation Size must have positive dimensions")
 			assert(attributes.SourcePathDelimiter ~= "", "SourcePathDelimiter must not be empty")
 			assert(attributes.SourceMaxYield >= 0, "SourceMaxYield must not be negative")
+			local pauseInterval = attributes.PauseInterval
+			assert(
+				pauseInterval >= 1 and pauseInterval < math.huge and pauseInterval % 1 == 0,
+				"PauseInterval must be a finite positive integer"
+			)
 			local minCount = math.ceil(attributes.GeneratedCount.Min)
 			local maxCount = math.floor(attributes.GeneratedCount.Max)
 			assert(minCount >= 0 and minCount <= maxCount, "GeneratedCount must contain a non-negative integer")
@@ -197,7 +203,7 @@ function Module.new(): Types.GeneratorModuleDefinition<Types.PackageAttributes>
 			local cells: { number } = {}
 			for index = 1, grid.X * grid.Y * grid.Z do
 				cells[index] = index - 1
-				if index % ENV.PAUSE_INTERVAL == 0 then
+				if index % pauseInterval == 0 then
 					parameters:Pause()
 				end
 			end
@@ -252,7 +258,7 @@ function Module.new(): Types.GeneratorModuleDefinition<Types.PackageAttributes>
 					instance:AddTag(tag)
 				end
 				(instance :: Instance).Parent = targetContainer
-				if index % ENV.PAUSE_INTERVAL == 0 then
+				if index % pauseInterval == 0 then
 					parameters:Pause()
 				end
 			end
