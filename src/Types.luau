@@ -16,6 +16,7 @@ export type PackageAttributes = {
 	GeneratedTags: string, -- tags it will add to the copies of the template in comma delimited format (aka "tag1,tag2,tag3"), spaces immediately after commas are ignored
 	GeneratedCount: NumberRange, -- how many copies of the source will be created
 	RandomSeed: number, -- used to keep regeneration deterministic
+	RandomPadding: NumberRange, -- minimum separation between instances
 	RandomRoll: NumberRange, -- X axis random rotation
 	RandomPan: NumberRange, -- Y axis random rotation
 	RandomTilt: NumberRange, -- Z axis random rotation
