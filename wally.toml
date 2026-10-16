@@ -1,0 +1,13 @@
+[package]
+name = "nightcycle/local-package"
+description = "using procedural models to create local packages"
+version = "3.1.0"
+license = "Apache"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+include = ["src", "default.project.json", "LICENSE"]
+
+[dependencies]
+IndexUtil = "nightcycle/index-util@^3.1.0"
+TypeUnionLib = "nightcycle/type-union-lib@0.3.3"
+Type = "osyrisrblx/t@3.1.1"
