@@ -25,7 +25,3 @@ end
 ## source configuration
 
 In order to connect to a template you must use the "SourcePath" attribute, or whatever attribute you like as they're all configurable at `LocalPackage.ENV` as well as through the `_G` variable with a `__LOCALPACKAGE__` prefix. When a source is a folder it will randomly select a valid (any BasePart or Model) descendant. If you'd like to restrict an attribute, most can also be embedded into the source as an ovveride. It also supports a "Size" attribute and "PivotOffset" attribute for overriding the inputs regarding the placement math.
-
-## warning
-
-As of writing this, ProceduralModel is not released out of studio beta. I probably won't be able to test it too thoroughly until that changes.
