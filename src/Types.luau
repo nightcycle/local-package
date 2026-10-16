@@ -7,7 +7,7 @@ export type ScaleType = "Default" | "Fit" | "Height"
 Types.ScaleType = Type.literal("Default", "Fit", "Height")
 export type PlacementType = "Grid" | "Random" | "Line" -- partially constrained by AlignType
 Types.PlacementType = Type.literal("Grid", "Random", "Line")
--- Templates may override PauseInterval, GeneratedAlignment/Scale/Count, and RandomRoll/Pan/Tilt.
+-- Templates may override PauseInterval, GeneratedAlignment/Scale/Count, and RandomScale/Roll/Pan/Tilt.
 -- Source settings, RandomSeed, tag fields, RandomPlacement, and RandomPadding stay package-controlled.
 export type PackageAttributes = {
 	SourcePath: string, -- where the original template is found, if a folder it will randomly select one of the basePart / model descendants using the seed
@@ -21,6 +21,7 @@ export type PackageAttributes = {
 	GeneratedCount: NumberRange, -- inclusive range of non-negative integer copy counts; template overrides set that selected template's total
 	RandomSeed: number, -- used to keep regeneration deterministic
 	RandomPadding: NumberRange, -- minimum separation between instances; a single seeded gap is sampled per generation
+	RandomScale: NumberRange, -- finite positive uniform scale multiplier sampled per copy after GeneratedScale; 1 preserves size
 	RandomRoll: NumberRange, -- X axis random rotation in degrees
 	RandomPan: NumberRange, -- Y axis random rotation in degrees
 	RandomTilt: NumberRange, -- Z axis random rotation in degrees

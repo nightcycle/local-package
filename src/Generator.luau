@@ -69,6 +69,11 @@ local function resolveTemplateAttributes(
 		resolved.GeneratedScale = scale
 	end
 	resolved.GeneratedCount = getRangeAttribute(template, "GeneratedCount", attributes.GeneratedCount)
+	resolved.RandomScale = getRangeAttribute(template, "RandomScale", attributes.RandomScale)
+	assert(
+		resolved.RandomScale.Min > 0 and resolved.RandomScale.Max < math.huge,
+		"RandomScale must contain finite positive scale factors"
+	)
 	resolved.RandomRoll = getRangeAttribute(template, "RandomRoll", attributes.RandomRoll)
 	resolved.RandomPan = getRangeAttribute(template, "RandomPan", attributes.RandomPan)
 	resolved.RandomTilt = getRangeAttribute(template, "RandomTilt", attributes.RandomTilt)
@@ -272,7 +277,23 @@ local function getBounds(instance: Template): (Vector3, Vector3)
 	return frame.Position, axisAlignedSize(frame, size)
 end
 
-local function prepareClone(template: Template, size: Vector3, rotation: CFrame, scaleType: Types.ScaleType): Template
+local function scaleInstance(instance: Template, scale: number)
+	if instance:IsA("BasePart") then
+		instance.Size *= scale
+		local offset = instance.PivotOffset
+		instance.PivotOffset = CFrame.new(offset.Position * scale) * offset.Rotation
+	else
+		instance:ScaleTo(math.max(ENV.DEFAULT_MIN_MODEL_SCALE, instance:GetScale() * scale))
+	end
+end
+
+local function prepareClone(
+	template: Template,
+	size: Vector3,
+	rotation: CFrame,
+	scaleType: Types.ScaleType,
+	randomScale: number
+): Template
 	assert(template.Archivable, `template "{template:GetFullName()}" must be Archivable`)
 	local instance = template:Clone()
 	local pivotOffset = template:GetAttribute("PivotOffset")
@@ -304,15 +325,12 @@ local function prepareClone(template: Template, size: Vector3, rotation: CFrame,
 		local scale = if scaleType == "Height"
 			then size.Y / sourceSize.Y
 			else math.min(size.X / sourceSize.X, size.Y / sourceSize.Y, size.Z / sourceSize.Z)
-		if instance:IsA("BasePart") then
-			instance.Size *= scale
-			local offset = instance.PivotOffset
-			instance.PivotOffset = CFrame.new(offset.Position * scale) * offset.Rotation
-		else
-			instance:ScaleTo(math.max(ENV.DEFAULT_MIN_MODEL_SCALE, instance:GetScale() * scale))
-		end
-		instance:PivotTo(rotation)
+		scaleInstance(instance, scale)
 	end
+	if randomScale ~= 1 then
+		scaleInstance(instance, randomScale)
+	end
+	instance:PivotTo(rotation)
 	return instance
 end
 
@@ -330,7 +348,7 @@ local function checkPadding(center: Vector3, size: Vector3, placed: { Bounds }, 
 		)
 		assert(
 			gap.Magnitude + ENV.DEFAULT_SMALL >= padding,
-			"RandomPadding cannot be satisfied; reduce rotation/count or use Fit"
+			"RandomPadding cannot be satisfied; reduce rotation/scale/count or use Fit"
 		)
 		if index % parameters.Attributes.PauseInterval == 0 then
 			parameters:Pause()
@@ -354,6 +372,7 @@ function newGenerator(
 		GeneratedCount = ENV.DEFAULT_GENERATED_COUNT,
 		RandomSeed = ENV.DEFAULT_RANDOM_SEED,
 		RandomPadding = ENV.DEFAULT_RANDOM_PADDING,
+		RandomScale = ENV.DEFAULT_RANDOM_SCALE,
 		RandomRoll = ENV.DEFAULT_RANDOM_ROLL,
 		RandomPan = ENV.DEFAULT_RANDOM_PAN,
 		RandomTilt = ENV.DEFAULT_RANDOM_TILT,
@@ -425,7 +444,11 @@ function newGenerator(
 					math.rad(random:NextNumber(copyAttributes.RandomPan.Min, copyAttributes.RandomPan.Max)),
 					math.rad(random:NextNumber(copyAttributes.RandomTilt.Min, copyAttributes.RandomTilt.Max))
 				)
-				local instance = prepareClone(template, cellSize, rotation, copyAttributes.GeneratedScale)
+				local scaleRange = copyAttributes.RandomScale
+				local randomScale = if scaleRange.Min == scaleRange.Max
+					then scaleRange.Min
+					else random:NextNumber(scaleRange.Min, scaleRange.Max)
+				local instance = prepareClone(template, cellSize, rotation, copyAttributes.GeneratedScale, randomScale)
 				local boundsCenter, boundsSize = getBounds(instance)
 				local cellIndex = cells[index]
 				local coordinates = Vector3.new(
@@ -479,10 +502,10 @@ Module.new = function()
 end
 
 Module.append = function<Attributes>(
-	attributes: Attributes,
+	defaultAttributes: Attributes,
 	fn: CallbackFn<Attributes & Types.PackageAttributes>
 ): Types.GeneratorModuleDefinition<Attributes & Types.PackageAttributes>
-	return newGenerator(attributes :: any, fn :: any) :: any
+	return newGenerator(defaultAttributes :: any, fn :: any) :: any
 end
 
 return Module
